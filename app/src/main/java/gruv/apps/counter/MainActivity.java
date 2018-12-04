@@ -60,9 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Vibrator vibrator;
 
-    private enum Sound {INCREMENT_SOUND, DECREMENT_SOUND}
-
-    ;
+    private enum Sound {INCREMENT_SOUND, DECREMENT_SOUND};
 
     private SoundPool soundPool;
     private SparseIntArray soundsMap;
