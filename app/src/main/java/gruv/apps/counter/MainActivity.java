@@ -2,10 +2,13 @@ package gruv.apps.counter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -18,7 +21,7 @@ import android.widget.TextView;
  * С сохранением/восстановлением значения с помощью SharedPreferences
  *
  * Не забыть добавить разрешение на вибрацию в манифест
- *  <uses-permission android:name="android.permission.VIBRATE" />
+ * <uses-permission android:name="android.permission.VIBRATE" />
  *
  * Без фрагментов
  * Без настроек (нельзя отключить вибро или звук)
@@ -57,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
 
     private Vibrator vibrator;
 
+    private enum Sound {INCREMENT_SOUND, DECREMENT_SOUND}
+
+    ;
+
+    private SoundPool soundPool;
+    private SparseIntArray soundsMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,6 +101,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Инициализируем вибратор
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        // Устанавливаем звуки
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        soundsMap = new SparseIntArray(2);
+        soundsMap.put(Sound.INCREMENT_SOUND.ordinal(), soundPool.load(this, R.raw.increment_sound, 1));
+        soundsMap.put(Sound.DECREMENT_SOUND.ordinal(), soundPool.load(this, R.raw.decrement_sound, 1));
     }
 
     /**
@@ -122,10 +139,10 @@ public class MainActivity extends AppCompatActivity {
      * Возвращает SharedPreferences, создавая при необходимости
      *
      * @return SharedPreferences
-     * */
+     */
     @NonNull
-    private SharedPreferences getSharedPreferences(){
-        if(sharedPreferences == null){
+    private SharedPreferences getSharedPreferences() {
+        if (sharedPreferences == null) {
             sharedPreferences = getBaseContext().getSharedPreferences(DATA_FILE_NAME, Context.MODE_PRIVATE);
         }
         return sharedPreferences;
@@ -158,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
         if (value < MAX_VALUE) {
             setValue(++value);
             vibrator.vibrate(VIBRATION_ENCREASE_DURATION);
+            playSound(Sound.INCREMENT_SOUND);
         }
     }
 
@@ -169,7 +187,17 @@ public class MainActivity extends AppCompatActivity {
         if (value > MIN_VALUE) {
             setValue(--value);
             vibrator.vibrate(VIBRATION_DECREASE_DURATION);
+            playSound(Sound.DECREMENT_SOUND);
         }
+    }
+
+    /**
+     * Проигрываем звук
+     */
+    private void playSound(@NonNull Sound sound) {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        float volume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        soundPool.play(soundsMap.get(sound.ordinal()), volume, volume, 1, 0, 1f);
     }
 
     /**
