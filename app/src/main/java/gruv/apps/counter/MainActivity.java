@@ -3,6 +3,7 @@ package gruv.apps.counter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,6 +16,9 @@ import android.widget.TextView;
  *
  * С озвучиванием нажатий на кнопки + вибро
  * С сохранением/восстановлением значения с помощью SharedPreferences
+ *
+ * Не забыть добавить разрешение на вибрацию в манифест
+ *  <uses-permission android:name="android.permission.VIBRATE" />
  *
  * Без фрагментов
  * Без настроек (нельзя отключить вибро или звук)
@@ -30,11 +34,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String VALUE_LEY = "key";
 
     // максимальное значение счетчика:
-    public static final int MAX_VALUE = 9999;
+    private static final int MAX_VALUE = 9999;
     // минимальное значение счетчика:
-    public static final int MIN_VALUE = -9999;
+    private static final int MIN_VALUE = -9999;
     // значение счетчика по-умолчанию:
-    public static final int DEFAULT_VALUE = 0;
+    private static final int DEFAULT_VALUE = 0;
+
+    private static final long VIBRATION_ENCREASE_DURATION = 40; // Milliseconds
+    private static final long VIBRATION_DECREASE_DURATION = 60; // Milliseconds
 
     // значение счетчика:
     private int value = DEFAULT_VALUE;
@@ -47,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private Button decrementButton;
 
     private SharedPreferences sharedPreferences;
+
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
                 decrement();
             }
         });
+
+        // Инициализируем вибратор
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     /**
@@ -145,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
     private void increment() {
         if (value < MAX_VALUE) {
             setValue(++value);
+            vibrator.vibrate(VIBRATION_ENCREASE_DURATION);
         }
     }
 
@@ -155,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
     private void decrement() {
         if (value > MIN_VALUE) {
             setValue(--value);
+            vibrator.vibrate(VIBRATION_DECREASE_DURATION);
         }
     }
 
