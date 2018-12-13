@@ -193,9 +193,18 @@ public class MainActivity extends AppCompatActivity {
      * Проигрываем звук
      */
     private void playSound(@NonNull Sound sound) {
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        float volume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+       float volume = getVolume();
         soundPool.play(soundsMap.get(sound.ordinal()), volume, volume, 1, 0, 1f);
+    }
+
+    /**
+     * "Считываем" текущее значение громкости (для музыки)
+     * */
+    private float getVolume(){
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        float curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        float maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        return (curVolume / maxVolume);
     }
 
     /**
